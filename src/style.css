@@ -1,0 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-roboto: "Roboto", sans-serif;
+}
+
+@theme {
+  --font-display: "Futura", "sans-serif";
+  --font-display--font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  --font-display--font-variation-settings: "opsz" 32;
+}
+
+@font-face {
+  font-family: Futura;
+  font-style: normal;
+  font-display: swap;
+  src: url("assets/fonts/futur.ttf") format("ttf");
+}
