@@ -6,7 +6,7 @@
         <filter id="noiseFilter">
           <feTurbulence
             type="fractalNoise"
-            baseFrequency="0.9"
+            baseFrequency="0.6"
             numOctaves="4"
             seed="5"
           />

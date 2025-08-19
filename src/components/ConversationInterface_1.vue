@@ -1,0 +1,689 @@
+<template>
+  <div class="w-full max-w-4xl mx-auto px-8 flex flex-col gap-8">
+    <!-- Control Section -->
+    <div class="flex gap-4 items-center justify-between">
+      <div class="flex gap-4 items-center">
+        <!-- Connect/Start Conversation Button -->
+        <button
+          v-if="!isConnected && !isConnecting"
+          @click="startConversation"
+          class="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[140px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-purple-600/30"
+        >
+          Start Conversation
+        </button>
+
+        <!-- Connecting State -->
+        <button
+          v-else-if="isConnecting"
+          disabled
+          class="bg-gradient-to-r from-yellow-600 to-yellow-800 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-not-allowed min-w-[140px] opacity-80"
+        >
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Loading...
+          </div>
+        </button>
+
+        <!-- Conversation Active -->
+        <button
+          v-else
+          @click="stopConversation"
+          class="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[140px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-600/30"
+        >
+          Stop Conversation
+        </button>
+
+        <div class="flex gap-2 items-center">
+          <div
+            class="w-3 h-3 rounded-full"
+            :class="{
+              'bg-gray-400': !isConnected && !isConnecting,
+              'bg-yellow-400 animate-pulse': isConnecting,
+              'bg-green-400': isConnected && conversationState === 'listening',
+              'bg-blue-400 animate-pulse': conversationState === 'processing',
+              'bg-purple-400 animate-pulse': conversationState === 'responding',
+              'bg-orange-400': conversationState === 'paused'
+            }"
+          ></div>
+          <span class="text-white text-sm font-medium">
+            {{ getStatusText() }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="flex gap-4 items-center">
+        <select
+          v-model="language"
+          :disabled="isConnected"
+          class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm backdrop-blur-md focus:outline-none focus:border-white/40 disabled:opacity-60"
+        >
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="nl">Dutch</option>
+        </select>
+
+        <select
+          v-model="whisperModel"
+          :disabled="isConnected"
+          class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm backdrop-blur-md focus:outline-none focus:border-white/40 disabled:opacity-60"
+        >
+          <option value="tiny">Whisper Tiny</option>
+          <option value="base">Whisper Base</option>
+          <option value="small">Whisper Small</option>
+          <option value="medium">Whisper Medium</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Conversation Display -->
+    <div class="min-h-[500px]">
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-8 min-h-[500px] backdrop-blur-md relative overflow-y-auto max-h-[600px]">
+        <div v-if="serverError" class="text-center text-red-400 mt-20">
+          <p>{{ errorMessage }}</p>
+          <button @click="reconnect" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors">
+            Try Again
+          </button>
+        </div>
+        <div v-else-if="!isConnected && !isConnecting" class="text-center text-gray-500 italic mt-20">
+          <div class="mb-4">
+            <div class="text-4xl mb-2">🎙️ 🤖</div>
+            <p>Click "Start Conversation" to begin talking with AI</p>
+            <p class="text-sm mt-2 opacity-75">Make sure both WhisperLive and Ollama are running</p>
+          </div>
+        </div>
+        <div v-else-if="isConnecting" class="text-center text-yellow-400 mt-20">
+          <div class="flex justify-center items-center mb-4">
+            <div class="w-8 h-8 border-3 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p>Connecting to services...</p>
+        </div>
+        <div v-else class="space-y-4">
+          <!-- Conversation messages -->
+          <div
+            v-for="(message, index) in conversationHistory"
+            :key="index"
+            class="flex gap-3"
+            :class="{ 'justify-end': message.role === 'user' }"
+          >
+            <div
+              class="max-w-[80%] p-4 rounded-2xl"
+              :class="{
+                'bg-blue-600/20 border border-blue-600/30': message.role === 'user',
+                'bg-purple-600/20 border border-purple-600/30': message.role === 'assistant'
+              }"
+            >
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider"
+                  :class="{
+                    'text-blue-400': message.role === 'user',
+                    'text-purple-400': message.role === 'assistant'
+                  }">
+                  {{ message.role === 'user' ? 'You' : 'AI' }}
+                </span>
+                <span class="text-xs text-gray-500">{{ formatTime(message.timestamp) }}</span>
+              </div>
+              <div class="text-white">
+                {{ message.content }}
+                <span v-if="message.isStreaming" class="text-purple-400 ml-1 animate-pulse">|</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current transcription -->
+          <div v-if="currentTranscription" class="flex gap-3">
+            <div class="max-w-[80%] p-4 rounded-2xl bg-blue-600/10 border border-blue-600/20 opacity-70">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-blue-300">You (speaking...)</span>
+              </div>
+              <div class="text-gray-300">
+                {{ currentTranscription }}
+                <span class="text-blue-400 ml-1 animate-pulse">|</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Info -->
+    <div class="flex gap-8 justify-center">
+      <div class="flex gap-2 items-center text-sm">
+        <span class="text-gray-400 font-medium">Whisper:</span>
+        <span class="text-white font-semibold">{{ whisperModel }}</span>
+      </div>
+      <div class="flex gap-2 items-center text-sm">
+        <span class="text-gray-400 font-medium">LLM:</span>
+        <span class="text-white font-semibold">{{ currentModel }}</span>
+      </div>
+      <div class="flex gap-2 items-center text-sm">
+        <span class="text-gray-400 font-medium">Messages:</span>
+        <span class="text-white font-semibold">{{ conversationHistory.length }}</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+
+export default {
+  name: 'ConversationInterface',
+  emits: ['streaming-change'],
+  setup(props, { emit }) {
+    // Configuration
+    const language = ref('en')
+    const whisperModel = ref('small')
+    const currentModel = ref('llama2')
+    const WHISPER_URL = 'ws://localhost:9090'
+    const OLLAMA_URL = 'http://localhost:11434'
+
+    // State
+    const websocket = ref(null)
+    const isConnected = ref(false)
+    const isConnecting = ref(false)
+    const serverError = ref(false)
+    const errorMessage = ref('')
+    const conversationState = ref('idle') // idle, listening, processing, responding, paused
+    const conversationHistory = ref([])
+    const currentTranscription = ref('')
+    const silenceTimer = ref(null)
+    const uid = ref(null)
+
+    // Audio
+    const audioContext = ref(null)
+    const microphone = ref(null)
+    const processor = ref(null)
+    const stream = ref(null)
+    const sampleRate = 16000
+    const chunk = 4096
+    const SILENCE_THRESHOLD = 1500 // ms of silence before processing
+
+    // Computed
+    const getStatusText = () => {
+      if (serverError.value) return 'Error'
+      if (isConnecting.value) return 'Connecting...'
+      if (!isConnected.value) return 'Not Connected'
+
+      switch (conversationState.value) {
+        case 'listening': return 'Listening...'
+        case 'processing': return 'Processing...'
+        case 'responding': return 'AI is speaking...'
+        case 'paused': return 'Paused'
+        default: return 'Ready'
+      }
+    }
+
+    const formatTime = (timestamp) => {
+      const date = new Date(timestamp)
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+
+    // Generate unique ID
+    const generateUID = () => {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0
+        const v = c === 'x' ? r : (r & 0x3 | 0x8)
+        return v.toString(16)
+      })
+    }
+
+    // Check Ollama and get current model
+    const checkOllamaConnection = async () => {
+      try {
+        const response = await fetch(`${OLLAMA_URL}/api/tags`)
+        if (!response.ok) {
+          throw new Error('Ollama is not running')
+        }
+        const data = await response.json()
+        if (data.models && data.models.length > 0) {
+          // Use the first available model
+          currentModel.value = data.models[0].name
+          console.log('Using Ollama model:', currentModel.value)
+        }
+        return true
+      } catch (error) {
+        throw new Error('Ollama is not running on localhost:11434')
+      }
+    }
+
+    // Start conversation
+    const startConversation = async () => {
+      isConnecting.value = true
+      serverError.value = false
+      conversationHistory.value = []
+      currentTranscription.value = ''
+
+      try {
+        // Check Ollama connection and get model
+        await checkOllamaConnection()
+
+        // Connect to WhisperLive
+        await connectToWhisper()
+      } catch (error) {
+        serverError.value = true
+        errorMessage.value = error.message
+        isConnecting.value = false
+      }
+    }
+
+    // Connect to WhisperLive
+    const connectToWhisper = () => {
+      return new Promise((resolve, reject) => {
+        uid.value = generateUID()
+        websocket.value = new WebSocket(WHISPER_URL)
+
+        websocket.value.onopen = () => {
+          console.log('WhisperLive connected')
+          sendWhisperConfiguration()
+          resolve()
+        }
+
+        websocket.value.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data)
+            handleWhisperMessage(message)
+          } catch (error) {
+            console.error('Error parsing message:', error)
+          }
+        }
+
+        websocket.value.onerror = (error) => {
+          console.error('WebSocket error:', error)
+          reject(new Error('Failed to connect to WhisperLive'))
+        }
+
+        websocket.value.onclose = () => {
+          console.log('WebSocket disconnected')
+          stopConversation()
+        }
+      })
+    }
+
+    // Send WhisperLive configuration
+    const sendWhisperConfiguration = () => {
+      const config = {
+        uid: uid.value,
+        language: language.value,
+        task: 'transcribe',
+        model: whisperModel.value,
+        use_vad: false,
+        max_clients: 4,
+        max_connection_time: 600,
+        send_last_n_segments: 10,
+        no_speech_thresh: 0.45,
+        clip_audio: false,
+        same_output_threshold: 10,
+      }
+
+      if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+        websocket.value.send(JSON.stringify(config))
+      }
+    }
+
+    // Handle WhisperLive messages
+    const handleWhisperMessage = (message) => {
+      if (message.uid && message.uid !== uid.value) return
+
+      if (message.message === 'SERVER_READY') {
+        isConnected.value = true
+        isConnecting.value = false
+        startListening()
+        return
+      }
+
+      if (message.segments) {
+        processTranscriptionSegments(message.segments)
+      }
+    }
+
+    // Process transcription segments
+    const processTranscriptionSegments = (segments) => {
+      for (const segment of segments) {
+        if (segment.text && segment.text.trim()) {
+          const text = segment.text.trim()
+
+          if (segment.completed === false) {
+            // Partial segment
+            currentTranscription.value = text
+            resetSilenceTimer()
+          } else {
+            // Completed segment
+            currentTranscription.value = text
+            resetSilenceTimer()
+          }
+        }
+      }
+    }
+
+    // Reset silence timer
+    const resetSilenceTimer = () => {
+      if (silenceTimer.value) {
+        clearTimeout(silenceTimer.value)
+      }
+
+      silenceTimer.value = setTimeout(() => {
+        if (currentTranscription.value && conversationState.value === 'listening') {
+          processUserInput()
+        }
+      }, SILENCE_THRESHOLD)
+    }
+
+    // Process user input
+    const processUserInput = async () => {
+      if (!currentTranscription.value.trim()) return
+
+      conversationState.value = 'processing'
+      stopListening()
+
+      // Add user message to history
+      const userMessage = {
+        role: 'user',
+        content: currentTranscription.value,
+        timestamp: Date.now()
+      }
+      conversationHistory.value.push(userMessage)
+      currentTranscription.value = ''
+
+      // Get AI response
+      await getAIResponse(userMessage.content)
+
+      // Resume listening
+      if (isConnected.value) {
+        setTimeout(() => {
+          startListening()
+        }, 500)
+      }
+    }
+
+    // Get AI response
+    const getAIResponse = async (userInput) => {
+      conversationState.value = 'responding'
+      emit('streaming-change', true)
+
+      // Add placeholder for AI response
+      const aiMessage = {
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now(),
+        isStreaming: true
+      }
+      conversationHistory.value.push(aiMessage)
+      const aiMessageIndex = conversationHistory.value.length - 1
+
+      try {
+        // Build conversation context
+        const messages = conversationHistory.value
+          .filter(msg => !msg.isStreaming)
+          .slice(-6) // Keep last 3 exchanges for context
+          .map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }))
+        messages.push({ role: 'user', content: userInput })
+
+        const response = await fetch(`${OLLAMA_URL}/api/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: currentModel.value,
+            messages: messages,
+            stream: true
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          const lines = chunk.split('\n')
+
+          for (const line of lines) {
+            if (line.trim()) {
+              try {
+                const data = JSON.parse(line)
+                if (data.message && data.message.content) {
+                  conversationHistory.value[aiMessageIndex].content += data.message.content
+                  scrollToBottom()
+                }
+              } catch (e) {
+                console.warn('Failed to parse JSON:', line)
+              }
+            }
+          }
+        }
+
+      } catch (error) {
+        conversationHistory.value[aiMessageIndex].content = `Error: ${error.message}`
+        console.error('Error calling Ollama:', error)
+      } finally {
+        conversationHistory.value[aiMessageIndex].isStreaming = false
+        emit('streaming-change', false)
+      }
+    }
+
+    // Start listening
+    const startListening = async () => {
+      if (conversationState.value === 'listening') return
+
+      try {
+        // Request microphone access
+        stream.value = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate: 48000,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: false
+          }
+        })
+
+        // Create audio context
+        audioContext.value = new (window.AudioContext || window.webkitAudioContext)({
+          sampleRate: 48000
+        })
+
+        if (audioContext.value.state === 'suspended') {
+          await audioContext.value.resume()
+        }
+
+        microphone.value = audioContext.value.createMediaStreamSource(stream.value)
+        processor.value = audioContext.value.createScriptProcessor(chunk, 1, 1)
+
+        processor.value.onaudioprocess = (event) => {
+          if (conversationState.value !== 'listening') return
+
+          const inputBuffer = event.inputBuffer
+          const inputData = inputBuffer.getChannelData(0)
+
+          // Resample to 16kHz
+          const resampledData = downsampleBuffer(inputData, audioContext.value.sampleRate, sampleRate)
+          const float32Buffer = new Float32Array(resampledData)
+
+          if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+            websocket.value.send(float32Buffer.buffer)
+          }
+        }
+
+        microphone.value.connect(processor.value)
+        processor.value.connect(audioContext.value.destination)
+
+        conversationState.value = 'listening'
+        console.log('Started listening')
+
+      } catch (error) {
+        console.error('Error starting recording:', error)
+        serverError.value = true
+        errorMessage.value = 'Error accessing microphone'
+      }
+    }
+
+    // Stop listening
+    const stopListening = () => {
+      if (processor.value) {
+        processor.value.disconnect()
+        processor.value.onaudioprocess = null
+        processor.value = null
+      }
+
+      if (microphone.value) {
+        microphone.value.disconnect()
+        microphone.value = null
+      }
+
+      if (stream.value) {
+        stream.value.getTracks().forEach(track => track.stop())
+        stream.value = null
+      }
+
+      if (audioContext.value && audioContext.value.state !== 'closed') {
+        audioContext.value.close()
+        audioContext.value = null
+      }
+
+      if (silenceTimer.value) {
+        clearTimeout(silenceTimer.value)
+        silenceTimer.value = null
+      }
+
+      conversationState.value = 'paused'
+    }
+
+    // Stop conversation
+    const stopConversation = () => {
+      stopListening()
+
+      if (websocket.value) {
+        websocket.value.close()
+        websocket.value = null
+      }
+
+      isConnected.value = false
+      isConnecting.value = false
+      conversationState.value = 'idle'
+      currentTranscription.value = ''
+      emit('streaming-change', false)
+    }
+
+    // Downsample buffer
+    const downsampleBuffer = (buffer, fromSampleRate, toSampleRate) => {
+      if (fromSampleRate === toSampleRate) {
+        return buffer
+      }
+
+      const sampleRateRatio = fromSampleRate / toSampleRate
+      const newLength = Math.round(buffer.length / sampleRateRatio)
+      const result = new Float32Array(newLength)
+
+      let offsetResult = 0
+      let offsetBuffer = 0
+
+      while (offsetResult < result.length) {
+        const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio)
+        let accum = 0
+        let count = 0
+
+        for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+          accum += buffer[i]
+          count++
+        }
+
+        result[offsetResult] = accum / count
+        offsetResult++
+        offsetBuffer = nextOffsetBuffer
+      }
+
+      return result
+    }
+
+    // Scroll to bottom of conversation
+    const scrollToBottom = async () => {
+      await nextTick()
+      const container = document.querySelector('.overflow-y-auto')
+      if (container) {
+        container.scrollTop = container.scrollHeight
+      }
+    }
+
+    // Reconnect
+    const reconnect = () => {
+      serverError.value = false
+      startConversation()
+    }
+
+    // Cleanup
+    const cleanup = () => {
+      stopConversation()
+    }
+
+    // Watch for conversation updates
+    watch(conversationHistory, () => {
+      scrollToBottom()
+    }, { deep: true })
+
+    onUnmounted(() => {
+      cleanup()
+    })
+
+    return {
+      // Data
+      language,
+      whisperModel,
+      currentModel,
+      isConnected,
+      isConnecting,
+      serverError,
+      errorMessage,
+      conversationState,
+      conversationHistory,
+      currentTranscription,
+
+      // Methods
+      startConversation,
+      stopConversation,
+      reconnect,
+      getStatusText,
+      formatTime
+    }
+  }
+}
+</script>
+
+<style scoped>
+/* Custom scrollbar for conversation */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Select styling */
+select option {
+  background-color: #1f2937;
+  color: white;
+}
+</style>
