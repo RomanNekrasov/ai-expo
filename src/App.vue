@@ -5,14 +5,6 @@
       @state-change="handleStateChange"
     />
     <div class="relative z-10 flex flex-col flex-1">
-<!--      <header class="text-center pt-12 pb-8 px-8">-->
-<!--        <h1 class="text-5xl md:text-6xl font-black text-white mb-2 &lt;!&ndash;drop-shadow-lg&ndash;&gt; tracking-tight">-->
-<!--          AI op Legacy Hardware-->
-<!--        </h1>-->
-<!--        <p class="text-xl text-white/80 font-light">-->
-<!--          Een visuele reis door lokale AI-verwerking-->
-<!--        </p>-->
-<!--      </header>-->
       <div class="flex-1 flex items-center justify-center">
         <StoryScene
           @scene-change="handleSceneChange"

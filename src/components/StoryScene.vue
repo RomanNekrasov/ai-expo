@@ -23,7 +23,11 @@
       <div :key="currentSceneIndex" class="scene-wrapper">
 
         <!-- All scenes now use the same unified container -->
-        <div class="scene-content-unified">
+        <div
+          class="scene-content-unified"
+          :class="{ 'has-background': currentScene.backgroundImage }"
+          :style="currentScene.backgroundImage ? { '--bg-image': `url(${currentScene.backgroundImage})` } : {}"
+        >
 
           <!-- Hero scene -->
           <div v-if="currentScene.type === 'hero'" class="unified-hero-content">
@@ -40,7 +44,7 @@
           </div>
 
           <!-- Default text scene -->
-          <div v-else-if="!currentScene.type || currentScene.type === 'text'" class="unified-text-content" :class="{ 'has-background': currentScene.backgroundImage }" :style="currentScene.backgroundImage ? { backgroundImage: `url(${currentScene.backgroundImage})` } : {}">
+          <div v-else-if="!currentScene.type || currentScene.type === 'text'" class="unified-text-content">
             <div class="scene-text">
               <h2 class="scene-title">{{ currentScene.title }}</h2>
               <p class="scene-description">{{ currentScene.description }}</p>
@@ -55,11 +59,11 @@
             <div class="unified-navigation">
               <div class="scene-navigation">
                 <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-                  ← Previous
+                  ← Vorige
                 </button>
                 <span class="scene-counter">{{ currentSceneIndex + 1 }} / {{ scenes.length }}</span>
                 <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-                  Next →
+                  Volgende →
                 </button>
               </div>
             </div>
@@ -78,10 +82,10 @@
             <div class="unified-navigation">
               <div class="scene-navigation">
                 <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-                  ← Previous
+                  ← Vorige
                 </button>
                 <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-                  Next →
+                  Volgende →
                 </button>
               </div>
             </div>
@@ -99,10 +103,51 @@
             <div class="unified-navigation">
               <div class="scene-navigation">
                 <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-                  ← Previous
+                  ← Vorige
                 </button>
                 <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-                  Next →
+                  Volgende →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- UTP Connection scene -->
+          <div v-else-if="currentScene.type === 'utp'" class="unified-utp-content">
+            <h2 class="scene-title">{{ currentScene.title }}</h2>
+            <p class="scene-description">{{ currentScene.description }}</p>
+
+            <div class="utp-visualization">
+              <div class="pc-box left-pc">
+                <div class="pc-label">LLM Machine</div>
+                <div class="pc-icon">💻</div>
+              </div>
+
+              <div class="utp-cable">
+                <div class="cable-line"></div>
+                <div class="data-flow"></div>
+                <div class="cable-label">UTP ethernet Kabel</div>
+              </div>
+
+              <div class="pc-box right-pc">
+                <div class="pc-label">Whisper Machine</div>
+                <div class="pc-icon">💻</div>
+              </div>
+            </div>
+
+            <ul v-if="currentScene.points" class="scene-points">
+              <li v-for="(point, idx) in currentScene.points" :key="idx">
+                {{ point }}
+              </li>
+            </ul>
+
+            <div class="unified-navigation">
+              <div class="scene-navigation">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Vorige
+                </button>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Volgende →
                 </button>
               </div>
             </div>
@@ -123,10 +168,10 @@
             <div class="unified-navigation-minimal">
               <div class="scene-navigation-minimal">
                 <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-                  ← Back
+                  ← Terug
                 </button>
                 <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-                  Continue →
+                  Doorgaan →
                 </button>
               </div>
             </div>
@@ -147,10 +192,10 @@
             <div class="unified-navigation-minimal">
               <div class="scene-navigation-minimal">
                 <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-                  ← Back
+                  ← Terug
                 </button>
                 <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-                  Continue →
+                  Doorgaan →
                 </button>
               </div>
             </div>
@@ -172,10 +217,10 @@
             <div class="unified-navigation-minimal">
               <div class="scene-navigation-minimal">
                 <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-                  ← Back
+                  ← Terug
                 </button>
                 <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-                  Continue →
+                  Doorgaan →
                 </button>
               </div>
             </div>
@@ -206,10 +251,10 @@
             <div class="unified-navigation" style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem;">
               <div class="scene-navigation-bottom">
                 <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-                  ← Previous
+                  ← Vorige
                 </button>
                 <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-                  Next →
+                  Volgende →
                 </button>
               </div>
             </div>
@@ -234,10 +279,10 @@
             <div class="unified-navigation" style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem;">
               <div class="scene-navigation-bottom">
                 <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-                  ← Previous
+                  ← Vorige
                 </button>
                 <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-                  Next →
+                  Volgende →
                 </button>
               </div>
             </div>
@@ -247,10 +292,6 @@
       </div>
     </transition>
 
-    <!-- Keyboard hint -->
-    <div class="keyboard-hint" v-if="currentScene.type !== 'chat' && currentScene.type !== 'whisper' && currentScene.type !== 'conversation'">
-      Use arrow keys to navigate
-    </div>
   </div>
 </template>
 
@@ -275,7 +316,7 @@ export default {
     const displayedText = ref('')
     const showCursor = ref(true)
     const typewriterTimeout = ref(null)
-    const fullText = "Een visuele reis door lokale AI-verwerking"
+    const fullText = "Een reis door lokale AI-verwerking"
     const typingSpeed = 80 // milliseconds per character
     const deletingSpeed = 50 // milliseconds per character
     const pauseBetweenCycles = 2000 // pause before starting to delete
@@ -286,7 +327,7 @@ export default {
       {
         type: 'hero',
         title: "AI op Legacy Hardware",
-        description: "Een visuele reis door lokale AI-verwerking",
+        description: "Een reis door lokale AI-verwerking",
         blobState: "normal",
         ctaText: "Begin Experience"
       },
@@ -311,15 +352,11 @@ export default {
         code: `// Word naar vector transformatie
 const wordVector = embedding_layer(token);
 // [0.2, -0.8, 0.1, 0.9, ...]
-
 // Attention mechanism
 const attention = softmax(
-  query * key_transpose / sqrt(dim)
-);
-
-// Context wordt berekend
-const output = attention * value;`,
-        image: "../assets/images_placeholder.png",
+  query * key_transpose / sqrt(dim));
+`,
+        image: "src/assets/vectors.jpeg",
         imageAlt: "LLM Word Vector Visualization"
       },
       {
@@ -330,52 +367,48 @@ const output = attention * value;`,
         code: `// Audio preprocessing
 const spectrogram = melSpectrogram(audio);
 // 80 mel-frequency bins
-
 // Encoder-decoder architectuur
 const encoded = encoder(spectrogram);
-const tokens = decoder(encoded);
-
-// Beam search voor beste transcriptie
-const text = beamSearch(tokens);`,
-        image: "../assets/images_placeholder.png",
+const tokens = decoder(encoded);`,
+        image: "src/assets/Spectrograms.jpg",
         imageAlt: "Whisper Audio Processing Pipeline"
       },
       {
-        type: 'images',
-        title: "System Performance",
-        blobState: "left",
-        images: [
-          { src: "../assets/images_placeholder.png", alt: "RAM Usage Monitoring", caption: "8GB RAM - Efficient Memory Management" },
-          { src: "../assets/images_placeholder.png", alt: "CPU Utilization Graph", caption: "90% CPU - Peak Processing Load" },
-          { src: "../assets/images_placeholder.png", alt: "Response Time Chart", caption: "1.2s Average Query Latency" },
-          { src: "../assets/images_placeholder.png", alt: "Model Architecture", caption: "7B Parameter Model Complexity" }
+        type: 'utp',
+        title: "Lokale AI Verwerking",
+        description: "De computers hebben geen internetverbinding en communiceren alleen via een UTP-kabel. Alle AI-verwerking gebeurt lokaal, zonder externe afhankelijkheden.",
+        blobState: "normal",
+        points: [
+          "Geen internetverbinding - volledig offline systeem",
+          "Directe communicatie via UTP ethernet kabel",
+          "Alle data blijft lokaal en privé"
         ]
       },
       {
         type: 'chat',
-        title: "Try It Yourself",
-        description: "Experience the AI in action. Ask anything!",
+        title: "Probeer het Zelf",
+        // description: "Ervaar de AI in actie. Stel elke vraag!",
         blobState: "left"
       },
       {
         type: 'whisper',
-        title: "Real-time Speech Recognition",
-        description: "Experience live speech-to-text transcription powered by OpenAI's Whisper model running locally.",
+        title: "Real-time Spraakherkenning",
+        description: "Ervaar live spraak-naar-tekst transcriptie met OpenAI's Whisper model dat lokaal draait.",
         blobState: "right"
       },
       {
         type: 'conversation',
-        title: "Voice Conversation with AI",
-        description: "Have a natural conversation with the AI using your voice. Speak naturally and the AI will respond.",
+        title: "Spraakconversatie met AI",
+        description: "Voer een natuurlijk gesprek met de AI via je stem. Spreek natuurlijk en de AI zal antwoorden.",
         blobState: "normal"
       },
       {
         type: 'split',
-        title: "Under the Hood",
-        description: "The system architecture that makes it possible",
+        title: "Onder de Motorkap",
+        description: "De systeemarchitectuur die het mogelijk maakt",
         blobState: "right",
-        code: `// Simplified inference loop
-async function processQuery(input) {
+        code: `// Vereenvoudigde inference loop
+async function verwerkVraag(input) {
   const tokens = tokenize(input);
   const embeddings = embed(tokens);
   const response = await model.generate(embeddings);
@@ -384,13 +417,15 @@ async function processQuery(input) {
       },
       {
         type: 'text',
-        title: "The Future",
-        description: "This demonstration shows that powerful AI doesn't always require the latest hardware. Sometimes, the old ways still work best.",
+        title: "De Toekomst",
+        description: "Deze demonstratie toont dat krachtige AI niet altijd de nieuwste hardware vereist. Soms werken de oude methodes nog het beste.",
         blobState: "normal",
         points: [
-          "Democratizing AI access",
-          "Reducing electronic waste",
-          "Empowering local computation"
+          "Democratiseren van AI-toegang",
+          "Verminderen van elektronisch afval",
+          "Versterken van lokale berekeningen",
+          "Behoud van privacy en controle",
+          "Duurzame technologie-innovatie"
         ]
       }
     ]
@@ -640,13 +675,40 @@ async function processQuery(input) {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
   padding: 3rem;
-  min-height: 500px;
-  max-height: 600px;
+  min-height: 700px;
+  max-height: 700px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow-y: auto;
   position: relative;
+}
+
+/* Background image variant */
+.scene-content-unified.has-background {
+  position: relative;
+}
+
+.scene-content-unified.has-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.25;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.scene-content-unified.has-background > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Specific layouts within the unified container */
@@ -665,77 +727,6 @@ async function processQuery(input) {
   flex: 1;
 }
 
-.unified-text-content.has-background {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.unified-text-content.has-background::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.85) 0%,
-    rgba(0, 0, 0, 0.75) 50%,
-    rgba(0, 0, 0, 0.85) 100%
-  );
-  border-radius: 20px;
-  z-index: 1;
-}
-
-.unified-text-content.has-background::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(221, 0, 0, 0.05);
-  border-radius: 20px;
-  z-index: 1;
-}
-
-.unified-text-content.has-background .scene-text,
-.unified-text-content.has-background .unified-navigation {
-  position: relative;
-  z-index: 2;
-}
-
-.unified-text-content.has-background .scene-text {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-  border-radius: 15px;
-  padding: 2.5rem;
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-.unified-text-content.has-background .scene-title {
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
-  color: #ffffff;
-}
-
-.unified-text-content.has-background .scene-description {
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.unified-text-content.has-background .scene-points li {
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
-  color: rgba(255, 255, 255, 0.9);
-}
-
 .unified-stats-content {
   display: flex;
   flex-direction: column;
@@ -745,6 +736,13 @@ async function processQuery(input) {
 .unified-images-content {
   display: flex;
   flex-direction: column;
+  flex: 1;
+}
+
+.unified-utp-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   flex: 1;
 }
 
@@ -760,6 +758,96 @@ async function processQuery(input) {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+/* UTP Visualization */
+.utp-visualization {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1rem 0;
+  flex: 1;
+  min-height: 200px;
+}
+
+.pc-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  min-width: 150px;
+  transition: all 0.3s ease;
+}
+
+.pc-box:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-5px);
+}
+
+.left-pc {
+  border-color: rgba(255, 102, 102, 0.5);
+}
+
+.right-pc {
+  border-color: rgba(102, 255, 102, 0.5);
+}
+
+.pc-label {
+  color: white;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.pc-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.utp-cable {
+  position: relative;
+  flex: 1;
+  height: 60px;
+  margin: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cable-line {
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(90deg, #ff6666 0%, #66ff66 100%);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.data-flow {
+  position: absolute;
+  top: 0;
+  left: -20px;
+  width: 40px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+  animation: data-flow 2s ease-in-out infinite;
+}
+
+.cable-label {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+@keyframes data-flow {
+  0% { left: -20px; }
+  100% { left: 100%; }
 }
 
 /* Navigation positioning for unified container */
@@ -949,6 +1037,7 @@ async function processQuery(input) {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1128,6 +1217,21 @@ async function processQuery(input) {
 
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .utp-visualization {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .utp-cable {
+    transform: rotate(90deg);
+    width: 60px;
+    margin: 1rem 0;
+  }
+
+  .cable-label {
+    transform: translateX(-50%) rotate(-90deg);
   }
 }
 </style>
