@@ -21,153 +21,228 @@
     <!-- Scene content -->
     <transition name="fade" mode="out-in">
       <div :key="currentSceneIndex" class="scene-wrapper">
-        <!-- Default text scene -->
-        <div v-if="!currentScene.type || currentScene.type === 'text'" class="scene-content">
-          <div class="scene-text">
-            <h2 class="scene-title">{{ currentScene.title }}</h2>
-            <p class="scene-description">{{ currentScene.description }}</p>
 
-            <ul v-if="currentScene.points" class="scene-points">
-              <li v-for="(point, idx) in currentScene.points" :key="idx">
-                {{ point }}
-              </li>
-            </ul>
-          </div>
+        <!-- All scenes now use the same unified container -->
+        <div class="scene-content-unified">
 
-          <div class="scene-navigation">
-            <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-              ← Previous
-            </button>
-            <span class="scene-counter">{{ currentSceneIndex + 1 }} / {{ scenes.length }}</span>
-            <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-              Next →
-            </button>
-          </div>
-        </div>
-
-        <!-- Chat interface scene -->
-        <div v-else-if="currentScene.type === 'chat'" class="scene-content-full">
-          <div class="scene-header">
-            <h2 class="scene-title">{{ currentScene.title }}</h2>
-            <p class="scene-subtitle">{{ currentScene.description }}</p>
-          </div>
-
-          <ChatInterface
-            v-if="currentScene.type === 'chat'"
-            @streaming-change="handleStreamingChange"
-          />
-
-          <div class="scene-navigation-minimal">
-            <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-              ← Back
-            </button>
-            <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-              Continue →
-            </button>
-          </div>
-        </div>
-
-        <!-- WhisperLive interface scene -->
-        <div v-else-if="currentScene.type === 'whisper'" class="scene-content-full">
-          <div class="scene-header">
-            <h2 class="scene-title">{{ currentScene.title }}</h2>
-            <p class="scene-subtitle">{{ currentScene.description }}</p>
-          </div>
-
-          <WhisperLiveInterface
-            v-if="currentScene.type === 'whisper'"
-            @streaming-change="handleStreamingChange"
-          />
-
-          <div class="scene-navigation-minimal">
-            <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-              ← Back
-            </button>
-            <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-              Continue →
-            </button>
-          </div>
-        </div>
-
-        <!-- Conversation interface scene -->
-        <div v-else-if="currentScene.type === 'conversation'" class="scene-content-full">
-          <div class="scene-header">
-            <h2 class="scene-title">{{ currentScene.title }}</h2>
-            <p class="scene-subtitle">{{ currentScene.description }}</p>
-          </div>
-
-          <ConversationInterface
-            v-if="currentScene.type === 'conversation'"
-            @streaming-change="handleStreamingChange"
-            @conversation-state-change="handleConversationStateChange"
-          />
-
-          <div class="scene-navigation-minimal">
-            <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-              ← Back
-            </button>
-            <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-              Continue →
-            </button>
-          </div>
-        </div>
-
-        <!-- Split view scene -->
-        <div v-else-if="currentScene.type === 'split'" class="scene-content-split">
-          <div class="split-left">
-            <h2 class="scene-title">{{ currentScene.title }}</h2>
-            <p class="scene-description">{{ currentScene.description }}</p>
-            <div v-if="currentScene.code" class="code-block">
-              <pre><code>{{ currentScene.code }}</code></pre>
+          <!-- Hero scene -->
+          <div v-if="currentScene.type === 'hero'" class="unified-hero-content">
+            <div class="hero-content">
+              <h1 class="hero-title">{{ currentScene.title }}</h1>
+              <p class="hero-description">
+                <span class="typewriter-text">{{ displayedText }}</span>
+                <span class="cursor" :class="{ 'visible': showCursor }">|</span>
+              </p>
+              <button @click="nextScene" class="hero-cta">
+                {{ currentScene.ctaText || 'Start Journey' }} →
+              </button>
             </div>
           </div>
-          <div class="split-right">
-            <div class="visual-demo">
-              <div v-for="i in 5" :key="i" class="demo-bar" :style="{
-                height: `${20 + Math.random() * 60}%`,
-                animationDelay: `${i * 0.1}s`
-              }"></div>
+
+          <!-- Default text scene -->
+          <div v-else-if="!currentScene.type || currentScene.type === 'text'" class="unified-text-content" :class="{ 'has-background': currentScene.backgroundImage }" :style="currentScene.backgroundImage ? { backgroundImage: `url(${currentScene.backgroundImage})` } : {}">
+            <div class="scene-text">
+              <h2 class="scene-title">{{ currentScene.title }}</h2>
+              <p class="scene-description">{{ currentScene.description }}</p>
+
+              <ul v-if="currentScene.points" class="scene-points">
+                <li v-for="(point, idx) in currentScene.points" :key="idx">
+                  {{ point }}
+                </li>
+              </ul>
+            </div>
+
+            <div class="unified-navigation">
+              <div class="scene-navigation">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Previous
+                </button>
+                <span class="scene-counter">{{ currentSceneIndex + 1 }} / {{ scenes.length }}</span>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Next →
+                </button>
+              </div>
             </div>
           </div>
-          <div class="scene-navigation-bottom">
-            <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-              ← Previous
-            </button>
-            <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-              Next →
-            </button>
-          </div>
-        </div>
 
-        <!-- Stats showcase scene -->
-        <div v-else-if="currentScene.type === 'stats'" class="scene-content">
-          <h2 class="scene-title">{{ currentScene.title }}</h2>
-          <div class="stats-grid">
-            <div v-for="stat in currentScene.stats" :key="stat.label" class="stat-card">
-              <div class="stat-value">{{ stat.value }}</div>
-              <div class="stat-label">{{ stat.label }}</div>
-              <div v-if="stat.detail" class="stat-detail">{{ stat.detail }}</div>
+          <!-- Stats showcase scene -->
+          <div v-else-if="currentScene.type === 'stats'" class="unified-stats-content">
+            <h2 class="scene-title">{{ currentScene.title }}</h2>
+            <div class="stats-grid">
+              <div v-for="stat in currentScene.stats" :key="stat.label" class="stat-card">
+                <div class="stat-value">{{ stat.value }}</div>
+                <div class="stat-label">{{ stat.label }}</div>
+                <div v-if="stat.detail" class="stat-detail">{{ stat.detail }}</div>
+              </div>
+            </div>
+            <div class="unified-navigation">
+              <div class="scene-navigation">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Previous
+                </button>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Next →
+                </button>
+              </div>
             </div>
           </div>
-          <div class="scene-navigation">
-            <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
-              ← Previous
-            </button>
-            <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
-              Next →
-            </button>
-          </div>
-        </div>
 
-        <!-- Hero scene -->
-        <div v-else-if="currentScene.type === 'hero'" class="scene-content-hero">
-          <div class="hero-content">
-            <h1 class="hero-title">{{ currentScene.title }}</h1>
-            <p class="hero-description">{{ currentScene.description }}</p>
-            <button @click="nextScene" class="hero-cta">
-              {{ currentScene.ctaText || 'Start Journey' }} →
-            </button>
+          <!-- Images showcase scene -->
+          <div v-else-if="currentScene.type === 'images'" class="unified-images-content">
+            <h2 class="scene-title">{{ currentScene.title }}</h2>
+            <div class="images-grid">
+              <div v-for="image in currentScene.images" :key="image.alt" class="image-card">
+                <img :src="image.src" :alt="image.alt" class="performance-image" />
+                <div class="image-caption">{{ image.caption }}</div>
+              </div>
+            </div>
+            <div class="unified-navigation">
+              <div class="scene-navigation">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Previous
+                </button>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Next →
+                </button>
+              </div>
+            </div>
           </div>
+
+          <!-- Chat interface scene -->
+          <div v-else-if="currentScene.type === 'chat'" class="unified-chat-content">
+            <div class="scene-header">
+              <h2 class="scene-title">{{ currentScene.title }}</h2>
+              <p class="scene-subtitle">{{ currentScene.description }}</p>
+            </div>
+
+            <ChatInterface
+              v-if="currentScene.type === 'chat'"
+              @streaming-change="handleStreamingChange"
+            />
+
+            <div class="unified-navigation-minimal">
+              <div class="scene-navigation-minimal">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Back
+                </button>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Continue →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- WhisperLive interface scene -->
+          <div v-else-if="currentScene.type === 'whisper'" class="unified-chat-content">
+            <div class="scene-header">
+              <h2 class="scene-title">{{ currentScene.title }}</h2>
+              <p class="scene-subtitle">{{ currentScene.description }}</p>
+            </div>
+
+            <WhisperLiveInterface
+              v-if="currentScene.type === 'whisper'"
+              @streaming-change="handleStreamingChange"
+            />
+
+            <div class="unified-navigation-minimal">
+              <div class="scene-navigation-minimal">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Back
+                </button>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Continue →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conversation interface scene -->
+          <div v-else-if="currentScene.type === 'conversation'" class="unified-chat-content">
+            <div class="scene-header">
+              <h2 class="scene-title">{{ currentScene.title }}</h2>
+              <p class="scene-subtitle">{{ currentScene.description }}</p>
+            </div>
+
+            <ConversationInterface
+              v-if="currentScene.type === 'conversation'"
+              @streaming-change="handleStreamingChange"
+              @conversation-state-change="handleConversationStateChange"
+            />
+
+            <div class="unified-navigation-minimal">
+              <div class="scene-navigation-minimal">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Back
+                </button>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Continue →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split view scene -->
+          <div v-else-if="currentScene.type === 'split'" class="unified-split-content">
+            <div class="split-left">
+              <h2 class="scene-title">{{ currentScene.title }}</h2>
+              <p class="scene-description">{{ currentScene.description }}</p>
+              <div v-if="currentScene.code" class="code-block">
+                <pre><code>{{ currentScene.code }}</code></pre>
+              </div>
+            </div>
+            <div class="split-right">
+              <div v-if="currentScene.image" class="image-container">
+                <img :src="currentScene.image" :alt="currentScene.imageAlt" class="split-image" />
+              </div>
+              <div v-else class="visual-demo">
+                <div v-for="i in 5" :key="i" class="demo-bar" :style="{
+                  height: `${20 + Math.random() * 60}%`,
+                  animationDelay: `${i * 0.1}s`
+                }"></div>
+              </div>
+            </div>
+
+            <!-- Navigation positioned absolutely at bottom -->
+            <div class="unified-navigation" style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem;">
+              <div class="scene-navigation-bottom">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Previous
+                </button>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Next →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split view scene (reversed layout) -->
+          <div v-else-if="currentScene.type === 'split-reverse'" class="unified-split-content">
+            <div class="split-left">
+              <div v-if="currentScene.image" class="image-container">
+                <img :src="currentScene.image" :alt="currentScene.imageAlt" class="split-image" />
+              </div>
+            </div>
+            <div class="split-right">
+              <h2 class="scene-title">{{ currentScene.title }}</h2>
+              <p class="scene-description">{{ currentScene.description }}</p>
+              <div v-if="currentScene.code" class="code-block">
+                <pre><code>{{ currentScene.code }}</code></pre>
+              </div>
+            </div>
+
+            <!-- Navigation positioned absolutely at bottom -->
+            <div class="unified-navigation" style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem;">
+              <div class="scene-navigation-bottom">
+                <button @click="previousScene" :disabled="currentSceneIndex === 0" class="nav-button prev">
+                  ← Previous
+                </button>
+                <button @click="nextScene" :disabled="currentSceneIndex === scenes.length - 1" class="nav-button next">
+                  Next →
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </transition>
@@ -196,35 +271,84 @@ export default {
   setup(props, { emit }) {
     const currentSceneIndex = ref(0)
 
+    // Typewriter effect state
+    const displayedText = ref('')
+    const showCursor = ref(true)
+    const typewriterTimeout = ref(null)
+    const fullText = "Een visuele reis door lokale AI-verwerking"
+    const typingSpeed = 80 // milliseconds per character
+    const deletingSpeed = 50 // milliseconds per character
+    const pauseBetweenCycles = 2000 // pause before starting to delete
+    const pauseBeforeRetyping = 1000 // pause before starting to type again
+
     // Enhanced scenes with different types
     const scenes = [
       {
         type: 'hero',
-        title: "AI on Legacy Hardware",
-        description: "Discover how powerful AI can run on older machines, proving that innovation doesn't always require the latest technology.",
+        title: "AI op Legacy Hardware",
+        description: "Een visuele reis door lokale AI-verwerking",
         blobState: "normal",
         ctaText: "Begin Experience"
       },
       {
         type: 'text',
-        title: "The Beginning",
-        description: "In a world where AI runs on legacy hardware, we discover that older machines have their own unique charm and capabilities.",
+        title: "Fat Clients van Team Geo",
+        description: "Van 2000 tot 2025 gebruikte Team Geo krachtige werkstations voor geografische berekeningen. Deze 'fat clients' waren uitgerust met GPU's voor complexe visualisaties en data-analyse.",
         blobState: "normal",
+        backgroundImage: "src/assets/kaart.png",
         points: [
-          "Legacy hardware from 2015-2020 era",
-          "Running local AI models efficiently",
-          "No cloud dependency needed"
+          "25 jaar ervaring met GPU-versnelde berekeningen",
+          "Geo-workloads: van kaartprojectie tot ruimtelijke analyse",
+          "Parallelle verwerking van grote datasets",
+          "Matrix-operaties voor transformaties en filtering"
         ]
       },
       {
-        type: 'stats',
+        type: 'split',
+        title: "Links: De LLM Machine",
+        description: "Deze PC host een Large Language Model dat tekst begrijpt en genereert door woorden om te zetten naar vectoren in een multidimensionale ruimte.",
+        blobState: "left",
+        code: `// Word naar vector transformatie
+const wordVector = embedding_layer(token);
+// [0.2, -0.8, 0.1, 0.9, ...]
+
+// Attention mechanism
+const attention = softmax(
+  query * key_transpose / sqrt(dim)
+);
+
+// Context wordt berekend
+const output = attention * value;`,
+        image: "../assets/images_placeholder.png",
+        imageAlt: "LLM Word Vector Visualization"
+      },
+      {
+        type: 'split-reverse',
+        title: "Rechts: De Whisper Machine",
+        description: "Deze PC transcribeert spraak naar tekst met OpenAI's Whisper model. Audio wordt omgezet naar spectrogrammen en vervolgens gedecodeerd naar woorden.",
+        blobState: "right",
+        code: `// Audio preprocessing
+const spectrogram = melSpectrogram(audio);
+// 80 mel-frequency bins
+
+// Encoder-decoder architectuur
+const encoded = encoder(spectrogram);
+const tokens = decoder(encoded);
+
+// Beam search voor beste transcriptie
+const text = beamSearch(tokens);`,
+        image: "../assets/images_placeholder.png",
+        imageAlt: "Whisper Audio Processing Pipeline"
+      },
+      {
+        type: 'images',
         title: "System Performance",
         blobState: "left",
-        stats: [
-          { value: "8GB", label: "RAM Usage", detail: "Efficient memory management" },
-          { value: "90%", label: "CPU Utilization", detail: "During peak processing" },
-          { value: "1.2s", label: "Response Time", detail: "Average query latency" },
-          { value: "7B", label: "Parameters", detail: "Model complexity" }
+        images: [
+          { src: "../assets/images_placeholder.png", alt: "RAM Usage Monitoring", caption: "8GB RAM - Efficient Memory Management" },
+          { src: "../assets/images_placeholder.png", alt: "CPU Utilization Graph", caption: "90% CPU - Peak Processing Load" },
+          { src: "../assets/images_placeholder.png", alt: "Response Time Chart", caption: "1.2s Average Query Latency" },
+          { src: "../assets/images_placeholder.png", alt: "Model Architecture", caption: "7B Parameter Model Complexity" }
         ]
       },
       {
@@ -288,6 +412,66 @@ async function processQuery(input) {
       }
     }
 
+    // Typewriter effect functions
+    const startTypewriter = () => {
+      stopTypewriter() // Clear any existing timeouts
+
+      let currentIndex = 0
+      let isDeleting = false
+
+      const typeStep = () => {
+        if (!isDeleting) {
+          // Typing forward
+          displayedText.value = fullText.substring(0, currentIndex + 1)
+          currentIndex++
+
+          if (currentIndex > fullText.length) {
+            // Finished typing, wait then start deleting
+            typewriterTimeout.value = setTimeout(() => {
+              isDeleting = true
+              typeStep()
+            }, pauseBetweenCycles)
+            return
+          }
+        } else {
+          // Deleting backward
+          displayedText.value = fullText.substring(0, currentIndex - 1)
+          currentIndex--
+
+          if (currentIndex <= 0) {
+            // Finished deleting, wait then start typing again
+            typewriterTimeout.value = setTimeout(() => {
+              isDeleting = false
+              currentIndex = 0
+              typeStep()
+            }, pauseBeforeRetyping)
+            return
+          }
+        }
+
+        // Continue with next character
+        const delay = isDeleting ? deletingSpeed : typingSpeed
+        typewriterTimeout.value = setTimeout(typeStep, delay)
+      }
+
+      // Start the animation
+      typeStep()
+    }
+
+    const stopTypewriter = () => {
+      if (typewriterTimeout.value) {
+        clearTimeout(typewriterTimeout.value)
+        typewriterTimeout.value = null
+      }
+    }
+
+    // Cursor blinking effect
+    const startCursorBlink = () => {
+      setInterval(() => {
+        showCursor.value = !showCursor.value
+      }, 500)
+    }
+
     const handleStreamingChange = (isStreaming) => {
       // Update blob state based on streaming and scene type
       if (currentScene.value.type === 'whisper') {
@@ -324,16 +508,32 @@ async function processQuery(input) {
       const scene = scenes[newIndex]
       emit('scene-change', scene)
       emit('blob-state-change', scene.blobState)
+
+      // Start/stop typewriter effect for hero scene
+      if (scene.type === 'hero') {
+        startTypewriter()
+      } else {
+        stopTypewriter()
+      }
     })
 
     onMounted(() => {
       window.addEventListener('keydown', handleKeypress)
       emit('scene-change', currentScene.value)
       emit('blob-state-change', currentScene.value.blobState)
+
+      // Start cursor blinking
+      startCursorBlink()
+
+      // Start typewriter if starting on hero scene
+      if (currentScene.value.type === 'hero') {
+        startTypewriter()
+      }
     })
 
     onUnmounted(() => {
       window.removeEventListener('keydown', handleKeypress)
+      stopTypewriter()
     })
 
     const handleConversationStateChange = (state) => {
@@ -358,7 +558,9 @@ async function processQuery(input) {
       nextScene,
       previousScene,
       handleStreamingChange,
-      handleConversationStateChange
+      handleConversationStateChange,
+      displayedText,
+      showCursor
     }
   }
 }
@@ -431,19 +633,149 @@ async function processQuery(input) {
   min-height: 500px;
 }
 
-/* Default scene content */
-.scene-content {
+/* UNIFIED CONTAINER - All scenes use this */
+.scene-content-unified {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
   padding: 3rem;
-  min-height: 400px;
+  min-height: 500px;
+  max-height: 600px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow-y: auto;
+  position: relative;
 }
 
+/* Specific layouts within the unified container */
+.unified-hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+}
+
+.unified-text-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.unified-text-content.has-background {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.unified-text-content.has-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.75) 50%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  border-radius: 20px;
+  z-index: 1;
+}
+
+.unified-text-content.has-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(221, 0, 0, 0.05);
+  border-radius: 20px;
+  z-index: 1;
+}
+
+.unified-text-content.has-background .scene-text,
+.unified-text-content.has-background .unified-navigation {
+  position: relative;
+  z-index: 2;
+}
+
+.unified-text-content.has-background .scene-text {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  border-radius: 15px;
+  padding: 2.5rem;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.unified-text-content.has-background .scene-title {
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+}
+
+.unified-text-content.has-background .scene-description {
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.unified-text-content.has-background .scene-points li {
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.unified-stats-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.unified-images-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.unified-split-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  flex: 1;
+  position: relative;
+}
+
+.unified-chat-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Navigation positioning for unified container */
+.unified-navigation {
+  margin-top: auto;
+  padding-top: 2rem;
+  flex-shrink: 0;
+}
+
+.unified-navigation-minimal {
+  margin-top: auto;
+  padding-top: 1rem;
+  flex-shrink: 0;
+}
+
+/* Scene content styles */
 .scene-text {
   flex: 1;
 }
@@ -485,17 +817,10 @@ async function processQuery(input) {
   font-weight: bold;
 }
 
-/* Hero scene */
-.scene-content-hero {
-  min-height: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
+/* Hero scene styles */
 .hero-content {
   max-width: 800px;
+  margin: 0 auto;
 }
 
 .hero-title {
@@ -512,6 +837,26 @@ async function processQuery(input) {
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 3rem;
   line-height: 1.6;
+  min-height: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.typewriter-text {
+  display: inline;
+}
+
+.cursor {
+  display: inline-block;
+  color: #ff6666;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.cursor.visible {
+  opacity: 1;
 }
 
 .hero-cta {
@@ -532,19 +877,11 @@ async function processQuery(input) {
   box-shadow: 0 6px 30px rgba(221, 0, 0, 0.4);
 }
 
-/* Chat, WhisperLive, and Conversation scene */
-.scene-content-full {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 2rem;
-  min-height: 600px;
-}
-
+/* Scene header for chat interfaces */
 .scene-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 .scene-subtitle {
@@ -553,12 +890,71 @@ async function processQuery(input) {
   margin-top: 0.5rem;
 }
 
-/* Stats scene */
+/* Images scene */
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+  flex: 1;
+}
+
+.image-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.image-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.performance-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.image-caption {
+  font-size: 1rem;
+  color: white;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Split scene image container */
+.image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+}
+
+.split-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 2rem;
-  margin: 3rem 0;
+  margin: 2rem 0;
+  flex: 1;
 }
 
 .stat-card {
@@ -595,21 +991,12 @@ async function processQuery(input) {
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* Split scene */
-.scene-content-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  min-height: 500px;
-  position: relative;
-}
-
+/* Split scene adjustments */
 .split-left, .split-right {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem;
 }
 
 .code-block {
@@ -652,20 +1039,14 @@ async function processQuery(input) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 3rem;
 }
 
 .scene-navigation-minimal {
   display: flex;
   justify-content: space-between;
-  margin-top: 2rem;
 }
 
 .scene-navigation-bottom {
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  right: 2rem;
   display: flex;
   justify-content: space-between;
 }
@@ -728,9 +1109,9 @@ async function processQuery(input) {
     padding: 1rem;
   }
 
-  .scene-content {
+  .scene-content-unified {
     padding: 2rem;
-    min-height: 350px;
+    min-height: 400px;
   }
 
   .scene-title {
@@ -741,13 +1122,8 @@ async function processQuery(input) {
     font-size: 2.5rem;
   }
 
-  .scene-content-split {
+  .unified-split-content {
     grid-template-columns: 1fr;
-  }
-
-  .scene-navigation-bottom {
-    position: static;
-    margin-top: 2rem;
   }
 
   .stats-grid {
