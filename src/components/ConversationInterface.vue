@@ -7,20 +7,20 @@
         <button
           v-if="!isConnected && !isConnecting"
           @click="startConversation"
-          class="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[140px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-purple-600/30"
+          class="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[180px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-purple-600/30"
         >
-          Start Conversation
+          Start Gesprek
         </button>
 
         <!-- Connecting State -->
         <button
           v-else-if="isConnecting"
           disabled
-          class="bg-gradient-to-r from-yellow-600 to-yellow-800 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-not-allowed min-w-[140px] opacity-80"
+          class="bg-gradient-to-r from-yellow-600 to-yellow-800 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-not-allowed min-w-[180px] opacity-80"
         >
           <div class="flex items-center gap-2">
             <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            Loading...
+            Verbinden...
           </div>
         </button>
 
@@ -28,9 +28,9 @@
         <button
           v-else
           @click="stopConversation"
-          class="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[140px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-600/30"
+          class="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[180px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-600/30"
         >
-          Stop Conversation
+          Stop Gesprek
         </button>
 
         <div class="flex gap-2 items-center">
@@ -54,8 +54,8 @@
       <!-- Settings -->
       <div class="flex gap-4 items-center">
         <div class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm backdrop-blur-md">
-          <span class="text-gray-400 mr-2">Language:</span>
-          <span class="font-semibold">Dutch</span>
+          <span class="text-gray-400 mr-2">Taal:</span>
+          <span class="font-semibold">Nederlands</span>
         </div>
         <div class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm backdrop-blur-md">
           <span class="text-gray-400 mr-2">Model:</span>
@@ -65,26 +65,26 @@
     </div>
 
     <!-- Conversation Display -->
-    <div class="min-h-[500px]">
-      <div class="bg-white/5 border border-white/10 rounded-2xl p-8 min-h-[500px] backdrop-blur-md relative overflow-y-auto max-h-[600px]">
+    <div class="min-h-[300px]">
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-8 min-h-[300px] backdrop-blur-md relative overflow-y-auto max-h-[300px]">
         <div v-if="serverError" class="text-center text-red-400 mt-20">
           <p>{{ errorMessage }}</p>
           <button @click="reconnect" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors">
-            Try Again
+            Probeer Opnieuw
           </button>
         </div>
         <div v-else-if="!isConnected && !isConnecting && conversationHistory.length === 0" class="text-center text-gray-500 italic mt-20">
           <div class="mb-4">
             <div class="text-4xl mb-2">🎙️ 🤖</div>
-            <p>Click "Start Conversation" to begin talking with AI</p>
-            <p class="text-sm mt-2 opacity-75">Make sure both WhisperLive and Ollama are running</p>
+            <p>Klik "Start Gesprek" om te beginnen praten met de AI</p>
+<!--            <p class="text-sm mt-2 opacity-75">Zorg ervoor dat zowel WhisperLive als Ollama draaien</p>-->
           </div>
         </div>
         <div v-else-if="isConnecting && conversationHistory.length === 0" class="text-center text-yellow-400 mt-20">
           <div class="flex justify-center items-center mb-4">
             <div class="w-8 h-8 border-3 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <p>Connecting to services...</p>
+          <p>Verbinden met services...</p>
         </div>
         <div v-else class="space-y-4">
           <!-- Conversation messages -->
@@ -107,7 +107,7 @@
                     'text-blue-400': message.role === 'user',
                     'text-purple-400': message.role === 'assistant'
                   }">
-                  {{ message.role === 'user' ? 'You' : 'AI' }}
+                  {{ message.role === 'user' ? 'Jij' : 'AI' }}
                 </span>
                 <span class="text-xs text-gray-500">{{ formatTime(message.timestamp) }}</span>
               </div>
@@ -122,7 +122,7 @@
           <div v-if="currentTranscription" class="flex gap-3 justify-end">
             <div class="max-w-[80%] p-4 rounded-2xl bg-blue-600/10 border border-blue-600/20 opacity-70">
               <div class="flex items-center gap-2 mb-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-blue-300">You (speaking...)</span>
+                <span class="text-xs font-semibold uppercase tracking-wider text-blue-300">Jij (spreekt...)</span>
               </div>
               <div class="text-gray-300">
                 {{ currentTranscription }}
@@ -145,7 +145,7 @@
         <span class="text-white font-semibold">{{ currentModel }}</span>
       </div>
       <div class="flex gap-2 items-center text-sm">
-        <span class="text-gray-400 font-medium">Messages:</span>
+        <span class="text-gray-400 font-medium">Berichten:</span>
         <span class="text-white font-semibold">{{ conversationHistory.length }}</span>
       </div>
     </div>
@@ -165,6 +165,12 @@ export default {
     const currentModel = ref('llama2')
     const WHISPER_URL = 'ws://localhost:9090'
     const OLLAMA_URL = 'http://localhost:11434'
+
+    // System prompt placeholder - you can customize this
+    const SYSTEM_PROMPT = `Je bent een behulpzame AI-assistent die natuurlijke gesprekken voert in het Nederlands.
+Je staat mevrouw Boelema te woord, zij is een gedeputeerde van de Provincie Noord-Brabant.
+Je hebt een vriendelijke en professionele persoonlijkheid. Geef korte, duidelijke antwoorden die geschikt zijn voor spraakconversaties.
+Vermijd lange uitleg tenzij specifiek gevraagd. Wees geduldig en begripvol.`
 
     // State
     const websocket = ref(null)
@@ -195,22 +201,22 @@ export default {
 
     // Computed
     const getStatusText = () => {
-      if (serverError.value) return 'Error'
-      if (isConnecting.value) return 'Connecting...'
-      if (!isConnected.value) return 'Not Connected'
+      if (serverError.value) return 'Fout'
+      if (isConnecting.value) return 'Verbinden...'
+      if (!isConnected.value) return 'Niet Verbonden'
 
       switch (conversationState.value) {
-        case 'listening': return 'Listening...'
-        case 'processing': return 'Processing...'
-        case 'responding': return 'AI is speaking...'
-        case 'paused': return 'Paused'
-        default: return 'Ready'
+        case 'listening': return 'Luisteren...'
+        case 'processing': return 'Verwerken...'
+        case 'responding': return 'AI spreekt...'
+        case 'paused': return 'Gepauzeerd'
+        default: return 'Klaar'
       }
     }
 
     const formatTime = (timestamp) => {
       const date = new Date(timestamp)
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
     }
 
     // Generate unique ID
@@ -227,17 +233,17 @@ export default {
       try {
         const response = await fetch(`${OLLAMA_URL}/api/tags`)
         if (!response.ok) {
-          throw new Error('Ollama is not running')
+          throw new Error('Ollama draait niet')
         }
         const data = await response.json()
         if (data.models && data.models.length > 0) {
           // Use the first available model
           currentModel.value = data.models[0].name
-          console.log('Using Ollama model:', currentModel.value)
+          console.log('Gebruik Ollama model:', currentModel.value)
         }
         return true
       } catch (error) {
-        throw new Error('Ollama is not running on localhost:11434')
+        throw new Error('Ollama draait niet op localhost:11434')
       }
     }
 
@@ -268,7 +274,7 @@ export default {
         websocket.value = new WebSocket(WHISPER_URL)
 
         websocket.value.onopen = () => {
-          console.log('WhisperLive connected')
+          console.log('WhisperLive verbonden')
           sendWhisperConfiguration()
           resolve()
         }
@@ -278,17 +284,17 @@ export default {
             const message = JSON.parse(event.data)
             handleWhisperMessage(message)
           } catch (error) {
-            console.error('Error parsing message:', error)
+            console.error('Fout bij verwerken bericht:', error)
           }
         }
 
         websocket.value.onerror = (error) => {
-          console.error('WebSocket error:', error)
-          reject(new Error('Failed to connect to WhisperLive'))
+          console.error('WebSocket fout:', error)
+          reject(new Error('Verbinding met WhisperLive mislukt'))
         }
 
         websocket.value.onclose = () => {
-          console.log('WebSocket disconnected')
+          console.log('WebSocket verbinding verbroken')
           stopConversation()
         }
       })
@@ -320,7 +326,7 @@ export default {
     // Handle WhisperLive messages
     const handleWhisperMessage = (message) => {
       // Log ALL messages from WhisperLive
-      console.log('WhisperLive Message:', JSON.stringify(message, null, 2))
+      console.log('WhisperLive Bericht:', JSON.stringify(message, null, 2))
 
       if (message.uid && message.uid !== uid.value) return
 
@@ -333,17 +339,17 @@ export default {
 
       // Only process segments when we're actively listening
       if (message.segments && conversationState.value === 'listening') {
-        console.log(`Processing ${message.segments.length} segments while in '${conversationState.value}' state`)
+        console.log(`Verwerken ${message.segments.length} segmenten in '${conversationState.value}' status`)
         processTranscriptionSegments(message.segments)
       } else if (message.segments) {
-        console.log(`Ignoring ${message.segments.length} segments - not in listening state (current: ${conversationState.value})`)
+        console.log(`Negeren ${message.segments.length} segmenten - niet in luister modus (huidig: ${conversationState.value})`)
       }
     }
 
     // Process transcription segments
     const processTranscriptionSegments = (segments) => {
-      console.log('=== PROCESSING SEGMENTS ===')
-      console.log('Number of segments:', segments.length)
+      console.log('=== SEGMENTEN VERWERKEN ===')
+      console.log('Aantal segmenten:', segments.length)
 
       // Log each segment in detail
       segments.forEach((segment, index) => {
@@ -368,36 +374,36 @@ export default {
         }
       }
 
-      console.log('Full transcription:', fullTranscription)
-      console.log('Previous transcription:', lastTranscriptionText.value)
-      console.log('Text changed?', fullTranscription !== lastTranscriptionText.value)
+      console.log('Volledige transcriptie:', fullTranscription)
+      console.log('Vorige transcriptie:', lastTranscriptionText.value)
+      console.log('Tekst veranderd?', fullTranscription !== lastTranscriptionText.value)
 
       if (fullTranscription) {
         currentTranscription.value = fullTranscription
 
         // Only reset timer if text actually changed
         if (fullTranscription !== lastTranscriptionText.value && conversationState.value === 'listening') {
-          console.log('Text changed - resetting silence timer')
+          console.log('Tekst veranderd - stilte timer resetten')
           lastTranscriptionText.value = fullTranscription
           lastTextChangeTime.value = Date.now()
           resetSilenceTimer()
         } else {
-          console.log('Text unchanged - silence timer continues')
+          console.log('Tekst onveranderd - stilte timer loopt door')
         }
       }
-      console.log('=== END PROCESSING ===\n')
+      console.log('=== EINDE VERWERKEN ===\n')
     }
 
     // Reset silence timer
     const resetSilenceTimer = () => {
       if (silenceTimer.value) {
         clearTimeout(silenceTimer.value)
-        console.log('Cleared existing silence timer')
+        console.log('Bestaande stilte timer gewist')
       }
 
-      console.log(`Starting new silence timer for ${SILENCE_THRESHOLD}ms`)
+      console.log(`Nieuwe stilte timer starten voor ${SILENCE_THRESHOLD}ms`)
       silenceTimer.value = setTimeout(() => {
-        console.log('SILENCE TIMER TRIGGERED - Processing input')
+        console.log('STILTE TIMER AFGEGAAN - Invoer verwerken')
         if (currentTranscription.value && conversationState.value === 'listening') {
           processUserInput()
         }
@@ -412,7 +418,7 @@ export default {
 
       // Don't process very short transcriptions that might be incomplete
       if (userText.length < MIN_TRANSCRIPTION_LENGTH) {
-        console.log('Transcription too short, waiting for more:', userText.length, 'chars')
+        console.log('Transcriptie te kort, wachten op meer:', userText.length, 'karakters')
         return
       }
 
@@ -423,7 +429,7 @@ export default {
 
       // If it doesn't end with punctuation and the last word seems incomplete, wait
       if (!endsWithPunctuation && lastWord && lastWord.length < 3) {
-        console.log('Transcription seems incomplete, waiting...')
+        console.log('Transcriptie lijkt onvolledig, wachten...')
         resetSilenceTimer() // Give it more time
         return
       }
@@ -440,7 +446,7 @@ export default {
         silenceTimer.value = null
       }
 
-      console.log('Processing user input after silence:', userText)
+      console.log('Gebruikersinvoer verwerken na stilte:', userText)
 
       // Add user message to history
       const userMessage = {
@@ -452,6 +458,30 @@ export default {
 
       // Get AI response (which will handle resuming listening)
       await getAIResponse(userMessage.content)
+    }
+
+    // Build conversation context with system prompt
+    const buildConversationContext = (userInput) => {
+      const messages = [
+        {
+          role: 'system',
+          content: SYSTEM_PROMPT
+        }
+      ]
+
+      // Add conversation history (last 6 messages for context)
+      const recentHistory = conversationHistory.value
+        .filter(msg => !msg.isStreaming)
+        .slice(-6)
+        .map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+
+      messages.push(...recentHistory)
+      messages.push({ role: 'user', content: userInput })
+
+      return messages
     }
 
     // Get AI response
@@ -470,15 +500,8 @@ export default {
       const aiMessageIndex = conversationHistory.value.length - 1
 
       try {
-        // Build conversation context
-        const messages = conversationHistory.value
-          .filter(msg => !msg.isStreaming)
-          .slice(-6) // Keep last 3 exchanges for context
-          .map(msg => ({
-            role: msg.role,
-            content: msg.content
-          }))
-        messages.push({ role: 'user', content: userInput })
+        // Build conversation context with system prompt
+        const messages = buildConversationContext(userInput)
 
         const response = await fetch(`${OLLAMA_URL}/api/chat`, {
           method: 'POST',
@@ -488,12 +511,16 @@ export default {
           body: JSON.stringify({
             model: currentModel.value,
             messages: messages,
-            stream: true
+            stream: true,
+            options: {
+              temperature: 0.7,
+              top_p: 0.9
+            }
           })
         })
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(`HTTP fout! status: ${response.status}`)
         }
 
         const reader = response.body.getReader()
@@ -515,15 +542,15 @@ export default {
                   scrollToBottom()
                 }
               } catch (e) {
-                console.warn('Failed to parse JSON:', line)
+                console.warn('Kan JSON niet verwerken:', line)
               }
             }
           }
         }
 
       } catch (error) {
-        conversationHistory.value[aiMessageIndex].content = `Error: ${error.message}`
-        console.error('Error calling Ollama:', error)
+        conversationHistory.value[aiMessageIndex].content = `Fout: ${error.message}`
+        console.error('Fout bij aanroepen Ollama:', error)
       } finally {
         conversationHistory.value[aiMessageIndex].isStreaming = false
         emit('conversation-state-change', 'idle')  // AI done responding
@@ -540,7 +567,7 @@ export default {
 
     // Reconnect to WhisperLive
     const reconnectWhisper = async () => {
-      console.log('Reconnecting to WhisperLive for fresh session...')
+      console.log('Herverbinden met WhisperLive voor nieuwe sessie...')
 
       isReconnecting.value = true  // Set reconnecting state
 
@@ -564,7 +591,7 @@ export default {
         await connectToWhisper()
         isReconnecting.value = false
       } catch (error) {
-        console.error('Failed to reconnect:', error)
+        console.error('Herverbinden mislukt:', error)
         isReconnecting.value = false
       }
     }
@@ -622,12 +649,12 @@ export default {
 
         conversationState.value = 'listening'
         emit('conversation-state-change', 'listening')  // Notify parent that we're transcribing
-        console.log('Started listening')
+        console.log('Luisteren gestart')
 
       } catch (error) {
-        console.error('Error starting recording:', error)
+        console.error('Fout bij starten opname:', error)
         serverError.value = true
-        errorMessage.value = 'Error accessing microphone'
+        errorMessage.value = 'Fout bij toegang tot microfoon'
       }
     }
 
