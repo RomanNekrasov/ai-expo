@@ -1,4 +1,4 @@
-// WhisperLiveInterface.vue - Dutch version with corrected audio handling
+// WhisperLiveInterface.vue - Corrected audio handling
 <template>
   <div class="w-full max-w-4xl mx-auto px-8 flex flex-col gap-8">
     <!-- Control Section -->
@@ -8,20 +8,20 @@
         <button
           v-if="!isConnected && !isConnecting"
           @click="connectToServer"
-          class="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[180px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/30"
+          class="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[140px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/30"
         >
-          Laad Whisper Model
+          Load Whisper Model
         </button>
 
         <!-- Connecting State -->
         <button
           v-else-if="isConnecting"
           disabled
-          class="bg-gradient-to-r from-yellow-600 to-yellow-800 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-not-allowed min-w-[180px] opacity-80"
+          class="bg-gradient-to-r from-yellow-600 to-yellow-800 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-not-allowed min-w-[140px] opacity-80"
         >
           <div class="flex items-center gap-2">
             <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            Laden...
+            Loading...
           </div>
         </button>
 
@@ -30,10 +30,10 @@
           v-else
           @click="toggleRecording"
           :disabled="!isConnected || isWaiting"
-          class="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[180px] disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:-translate-y-0.5 hover:enabled:shadow-lg hover:enabled:shadow-red-600/30"
+          class="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 border-0 rounded-xl px-8 py-4 text-white text-base font-semibold cursor-pointer transition-all duration-300 min-w-[140px] disabled:opacity-60 disabled:cursor-not-allowed hover:enabled:-translate-y-0.5 hover:enabled:shadow-lg hover:enabled:shadow-red-600/30"
           :class="{ 'from-green-600 to-green-800 hover:from-green-500 hover:to-green-700': isRecording }"
         >
-          {{ isRecording ? 'Stop Opname' : 'Start Opname' }}
+          {{ isRecording ? 'Stop Recording' : 'Start Recording' }}
         </button>
 
         <div class="flex gap-2 items-center">
@@ -55,20 +55,28 @@
 
       <!-- Settings -->
       <div class="flex gap-4 items-center">
+        <select
+          v-model="language"
+          :disabled="isRecording || isConnecting"
+          class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm backdrop-blur-md focus:outline-none focus:border-white/40 disabled:opacity-60"
+        >
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="nl">Dutch</option>
+        </select>
 
-
-         <!-- Settings -->
-      <div class="flex gap-4 items-center">
-        <div class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm backdrop-blur-md">
-          <span class="text-gray-400 mr-2">Taal:</span>
-          <span class="font-semibold">Nederlands</span>
-        </div>
-        <div class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm backdrop-blur-md">
-          <span class="text-gray-400 mr-2">Model:</span>
-          <span class="font-semibold">Medium</span>
-        </div>
-      </div>
-
+        <select
+          v-model="model"
+          :disabled="isRecording || isConnecting || isConnected"
+          class="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm backdrop-blur-md focus:outline-none focus:border-white/40 disabled:opacity-60"
+        >
+          <option value="tiny">Tiny</option>
+          <option value="base">Base</option>
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+        </select>
 
         <!-- Disconnect button when connected -->
         <button
@@ -77,7 +85,7 @@
           :disabled="isRecording"
           class="bg-gray-600 hover:bg-gray-500 border-0 rounded-lg px-3 py-2 text-white text-sm font-medium cursor-pointer transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Verbreek Verbinding
+          Disconnect
         </button>
       </div>
     </div>
@@ -89,28 +97,28 @@
           <div v-if="serverError" class="text-center text-red-400 mt-20">
             <p>{{ errorMessage }}</p>
             <button @click="reconnect" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors">
-              Probeer Opnieuw
+              Try Again
             </button>
           </div>
           <div v-else-if="!isConnected && !isConnecting" class="text-center text-gray-500 italic mt-20">
             <div class="mb-4">
               <div class="text-4xl mb-2">🎤</div>
-              <p>Klik "Laad Whisper Model" om verbinding te maken met de Whisper Machine</p>
-<!--              <p class="text-sm mt-2 opacity-75">Zorg ervoor dat de WhisperLive server draait op localhost:9090</p>-->
+              <p>Click "Load Whisper Model" to connect to the server</p>
+              <p class="text-sm mt-2 opacity-75">Make sure WhisperLive server is running on localhost:9090</p>
             </div>
           </div>
           <div v-else-if="isConnecting" class="text-center text-yellow-400 mt-20">
             <div class="flex justify-center items-center mb-4">
               <div class="w-8 h-8 border-3 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
             </div>
-            <p>Whisper model wordt geladen...</p>
-            <p class="text-sm mt-2 opacity-75">Dit kan even duren</p>
+            <p>Loading Whisper model...</p>
+            <p class="text-sm mt-2 opacity-75">This may take a few moments</p>
           </div>
           <div v-else-if="isWaiting" class="text-center text-yellow-400 mt-20">
-            Server is bezet. Een moment geduld...
+            Server is busy. Please wait...
           </div>
           <div v-else-if="transcriptionSegments.length === 0 && !isRecording" class="text-center text-gray-500 italic mt-20">
-            Klik "Start Opname" om live transcriptie te beginnen
+            Click "Start Recording" to begin live transcription
           </div>
           <div v-else class="space-y-3">
             <div
@@ -136,11 +144,11 @@
         <span class="text-white font-semibold">{{ model }}</span>
       </div>
       <div class="flex gap-2 items-center text-sm">
-        <span class="text-gray-400 font-medium">Taal:</span>
-        <span class="text-white font-semibold">{{ getLanguageDisplayName() }}</span>
+        <span class="text-gray-400 font-medium">Language:</span>
+        <span class="text-white font-semibold">{{ language }}</span>
       </div>
       <div class="flex gap-2 items-center text-sm">
-        <span class="text-gray-400 font-medium">Pakketten:</span>
+        <span class="text-gray-400 font-medium">Packets:</span>
         <span class="text-white font-semibold">{{ packetsSent }}</span>
       </div>
     </div>
@@ -154,11 +162,11 @@ export default {
   name: 'WhisperLiveInterface',
   emits: ['streaming-change'],
   setup(props, { emit }) {
-    // Configuration - Fixed to Dutch and medium model
+    // Configuration
     const serverHost = ref('localhost')
     const serverPort = ref(9090)
-    const language = ref('nl')
-    const model = ref('medium')
+    const language = ref('en')
+    const model = ref('small')
     const useVAD = ref(false)
 
     // State
@@ -194,16 +202,12 @@ export default {
     })
 
     const getStatusText = () => {
-      if (serverError.value) return 'Fout'
-      if (isConnecting.value) return 'Model Laden...'
-      if (isWaiting.value) return 'Wachten...'
-      if (!isConnected.value) return 'Niet Verbonden'
-      if (isRecording.value) return 'Opnemen...'
-      return 'Klaar'
-    }
-
-    const getLanguageDisplayName = () => {
-      return 'Nederlands'
+      if (serverError.value) return 'Error'
+      if (isConnecting.value) return 'Loading Model...'
+      if (isWaiting.value) return 'Waiting...'
+      if (!isConnected.value) return 'Not Connected'
+      if (isRecording.value) return 'Recording...'
+      return 'Ready'
     }
 
     // Generate unique ID
@@ -236,7 +240,7 @@ export default {
       websocket.value = new WebSocket(wsUrl)
 
       websocket.value.onopen = () => {
-        console.log('WebSocket verbonden')
+        console.log('WebSocket connected')
         sendConfiguration()
       }
 
@@ -245,21 +249,21 @@ export default {
           const message = JSON.parse(event.data)
           handleServerMessage(message)
         } catch (error) {
-          console.error('Fout bij verwerken bericht:', error)
+          console.error('Error parsing message:', error)
         }
       }
 
       websocket.value.onerror = (error) => {
-        console.error('WebSocket fout:', error)
+        console.error('WebSocket error:', error)
         isConnecting.value = false
         connectionStatus.value = 'disconnected'
         serverError.value = true
-        errorMessage.value = 'Verbinding mislukt. Zorg ervoor dat de WhisperLive server draait op localhost:9090'
+        errorMessage.value = 'Failed to connect. Make sure WhisperLive server is running on localhost:9090'
         isConnected.value = false
       }
 
       websocket.value.onclose = (event) => {
-        console.log('WebSocket verbinding verbroken:', event.code, event.reason)
+        console.log('WebSocket disconnected:', event.code, event.reason)
         isConnected.value = false
         isConnecting.value = false
         connectionStatus.value = 'disconnected'
@@ -294,7 +298,7 @@ export default {
 
       if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
         websocket.value.send(JSON.stringify(config))
-        console.log('Configuratie verzonden:', config)
+        console.log('Configuration sent:', config)
       }
     }
 
@@ -311,14 +315,14 @@ export default {
 
       // Handle disconnect
       if (message.message === 'DISCONNECT') {
-        console.log('Server verbinding verbroken wegens tijdsoverschrijding')
+        console.log('Server disconnected due to overtime')
         stopRecording()
         return
       }
 
       // Handle server ready
       if (message.message === 'SERVER_READY') {
-        console.log(`Server klaar met backend: ${message.backend}`)
+        console.log(`Server ready with backend: ${message.backend}`)
         isConnected.value = true
         isConnecting.value = false
         connectionStatus.value = 'connected'
@@ -329,7 +333,7 @@ export default {
 
       // Handle language detection
       if (message.language) {
-        console.log(`Server detecteerde taal: ${message.language}`)
+        console.log(`Server detected language: ${message.language}`)
         return
       }
 
@@ -349,10 +353,10 @@ export default {
         case 'ERROR':
           serverError.value = true
           errorMessage.value = message.message
-          console.error(`Server fout: ${message.message}`)
+          console.error(`Server error: ${message.message}`)
           break
         case 'WARNING':
-          console.warn(`Server waarschuwing: ${message.message}`)
+          console.warn(`Server warning: ${message.message}`)
           break
       }
     }
@@ -443,12 +447,12 @@ export default {
 
         isRecording.value = true
         emit('streaming-change', true)
-        console.log('Opname gestart met sample rate:', audioContext.value.sampleRate)
+        console.log('Recording started with sample rate:', audioContext.value.sampleRate)
 
       } catch (error) {
-        console.error('Fout bij starten opname:', error)
+        console.error('Error starting recording:', error)
         serverError.value = true
-        errorMessage.value = 'Fout bij toegang tot microfoon. Controleer de toestemmingen.'
+        errorMessage.value = 'Error accessing microphone. Please check permissions.'
       }
     }
 
@@ -476,7 +480,7 @@ export default {
 
       isRecording.value = false
       emit('streaming-change', false)
-      console.log('Opname gestopt')
+      console.log('Recording stopped')
     }
 
     // Simple downsampling function
@@ -524,7 +528,8 @@ export default {
     }
 
     onMounted(() => {
-      console.log('WhisperLive component geladen - wachten op gebruiker om verbinding te maken')
+      // Don't auto-connect anymore - user needs to click the button
+      console.log('WhisperLive component mounted - waiting for user to connect')
     })
 
     onUnmounted(() => {
@@ -552,8 +557,7 @@ export default {
       connectToServer,
       disconnect,
       reconnect,
-      getStatusText,
-      getLanguageDisplayName
+      getStatusText
     }
   }
 }
