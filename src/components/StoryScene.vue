@@ -417,14 +417,13 @@ export default {
       {
         type: 'text',
         title: "Fat Clients van Team Geo",
-        description: "Van 2000 tot 2025 gebruikte Team Geo krachtige werkstations voor geografische berekeningen. Deze 'fat clients' waren uitgerust met GPU's voor complexe visualisaties en data-analyse.",
+        description: "Van 2000 tot 2025 gebruikte Team Geo krachtige werkstations voor geografische berekeningen en analyses. Deze 'fat clients' zijn uitgerust met GPU's.",
         blobState: "normal",
         backgroundImage: "src/assets/kaart.png",
         points: [
-          "25 jaar ervaring met GPU-versnelde berekeningen",
-          "Geo-workloads: van kaartprojectie tot ruimtelijke analyse",
-          "Parallelle verwerking van grote datasets",
-          "Matrix-operaties voor transformaties en filtering"
+          "Fat Clients verhuis naar de cloud",
+          "Oude machines afgeschreven",
+          "Geo Workloads zijn te vertalen naar AI workloads",
         ]
       },
       {
