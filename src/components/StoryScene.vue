@@ -171,7 +171,7 @@ const componentProps = computed(() => {
   z-index: 1;
 }
 
-.scene-title {
+.story-container :deep(.scene-title) {
   font-size: 2.5rem;
   font-weight: 800;
   color: white;
@@ -179,34 +179,34 @@ const componentProps = computed(() => {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.scene-description {
+.story-container :deep(.scene-description) {
   font-size: 1.25rem;
   line-height: 1.8;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 2rem;
 }
 
-.scene-navigation,
-.scene-navigation-minimal,
-.scene-navigation-bottom {
+.story-container :deep(.scene-navigation),
+.story-container :deep(.scene-navigation-minimal),
+.story-container :deep(.scene-navigation-bottom) {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.unified-navigation {
+.story-container :deep(.unified-navigation) {
   margin-top: auto;
   padding-top: 2rem;
   flex-shrink: 0;
 }
 
-.unified-navigation-minimal {
+.story-container :deep(.unified-navigation-minimal) {
   margin-top: auto;
   padding-top: 1rem;
   flex-shrink: 0;
 }
 
-.nav-button {
+.story-container :deep(.nav-button) {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
@@ -218,27 +218,27 @@ const componentProps = computed(() => {
   transition: all 0.3s ease;
 }
 
-.nav-button:hover:not(:disabled) {
+.story-container :deep(.nav-button:hover:not(:disabled)) {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.nav-button:disabled {
+.story-container :deep(.nav-button:disabled) {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
-.scene-counter {
+.story-container :deep(.scene-counter) {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
 }
 
-.scene-header {
+.story-container :deep(.scene-header) {
   margin-bottom: 1.5rem;
 }
 
-.scene-subtitle {
+.story-container :deep(.scene-subtitle) {
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.75);
 }

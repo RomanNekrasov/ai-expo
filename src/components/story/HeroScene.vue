@@ -14,6 +14,8 @@
 </template>
 
 <script setup>
+import { toRefs } from 'vue'
+
 const props = defineProps({
   scene: {
     type: Object,
@@ -33,7 +35,7 @@ const props = defineProps({
   }
 })
 
-const { scene, onNext, displayedText, showCursor } = props
+const { scene, onNext, displayedText, showCursor } = toRefs(props)
 </script>
 
 <style scoped>
