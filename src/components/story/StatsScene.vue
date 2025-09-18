@@ -59,40 +59,42 @@ const { scene, isFirst, isLast, onNext, onPrevious } = props
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+  gap: 2rem;
+  margin: 2rem 0;
+  flex: 1;
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 2rem;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .stat-value {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 800;
-  color: #fff;
+  color: #ff6666;
+  margin-bottom: 0.5rem;
 }
 
 .stat-label {
-  margin-top: 0.5rem;
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: white;
   font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .stat-detail {
-  margin-top: 0.75rem;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 </style>

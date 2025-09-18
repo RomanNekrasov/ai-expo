@@ -1,6 +1,6 @@
 <template>
-  <div class="split-scene" :class="{ reverse }">
-    <div class="split-column text-column">
+  <div class="unified-split-content">
+    <div class="split-left">
       <template v-if="!reverse">
         <h2 class="scene-title">{{ scene.title }}</h2>
         <p class="scene-description">{{ scene.description }}</p>
@@ -15,7 +15,7 @@
       </template>
     </div>
 
-    <div class="split-column visual-column">
+    <div class="split-right">
       <template v-if="reverse">
         <h2 class="scene-title">{{ scene.title }}</h2>
         <p class="scene-description">{{ scene.description }}</p>
@@ -87,7 +87,7 @@ const demoBars = ref(Array.from({ length: 5 }, () => 20 + Math.random() * 60))
 </script>
 
 <style scoped>
-.split-scene {
+.unified-split-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
@@ -95,7 +95,8 @@ const demoBars = ref(Array.from({ length: 5 }, () => 20 + Math.random() * 60))
   position: relative;
 }
 
-.split-column {
+.split-left,
+.split-right {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 15px;
@@ -110,12 +111,16 @@ const demoBars = ref(Array.from({ length: 5 }, () => 20 + Math.random() * 60))
   align-items: center;
   justify-content: center;
   height: 100%;
+  padding: 1rem;
 }
 
 .split-image {
-  max-width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .visual-demo {
@@ -144,6 +149,7 @@ const demoBars = ref(Array.from({ length: 5 }, () => 20 + Math.random() * 60))
   background: rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   padding: 1.5rem;
+  margin-top: 2rem;
   font-family: 'Monaco', 'Consolas', monospace;
 }
 

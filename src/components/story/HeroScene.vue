@@ -1,6 +1,6 @@
 <template>
-  <div class="hero-content">
-    <div class="hero-text">
+  <div class="hero-scene">
+    <div class="hero-content">
       <h1 class="hero-title">{{ scene.title }}</h1>
       <p class="hero-description">
         <span class="typewriter-text">{{ displayedText }}</span>
@@ -39,7 +39,7 @@ const { scene, onNext, displayedText, showCursor } = toRefs(props)
 </script>
 
 <style scoped>
-.hero-content {
+.hero-scene {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +47,7 @@ const { scene, onNext, displayedText, showCursor } = toRefs(props)
   flex: 1;
 }
 
-.hero-text {
+.hero-content {
   max-width: 800px;
   margin: 0 auto;
 }
@@ -61,24 +61,28 @@ const { scene, onNext, displayedText, showCursor } = toRefs(props)
   line-height: 1.1;
 }
 
+
 .hero-description {
   font-size: 1.5rem;
-  line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 3rem;
+  line-height: 1.6;
   min-height: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .typewriter-text {
-  font-family: 'Courier New', Courier, monospace;
-  letter-spacing: 0.05em;
+  display: inline;
 }
 
 .cursor {
   display: inline-block;
-  margin-left: 0.25rem;
+  color: #ff6666;
+  font-weight: bold;
   opacity: 0;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.1s ease;
 }
 
 .cursor.visible {
@@ -86,20 +90,20 @@ const { scene, onNext, displayedText, showCursor } = toRefs(props)
 }
 
 .hero-cta {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #dd0000 0%, #ff6666 100%);
   color: white;
-  padding: 1rem 2.5rem;
-  border-radius: 12px;
-  font-size: 1.2rem;
+  border: none;
+  padding: 1rem 3rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(221, 0, 0, 0.3);
 }
 
 .hero-cta:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(221, 0, 0, 0.4);
 }
 </style>

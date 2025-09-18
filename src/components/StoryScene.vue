@@ -268,8 +268,40 @@ const componentProps = computed(() => {
     min-height: 400px;
   }
 
-  .scene-title {
+  .story-container :deep(.scene-title) {
     font-size: 2rem;
+  }
+
+  .story-container :deep(.hero-title) {
+    font-size: 2.5rem;
+  }
+
+  .story-container :deep(.unified-split-content) {
+    grid-template-columns: 1fr;
+  }
+
+  .story-container :deep(.stats-grid) {
+    grid-template-columns: 1fr;
+  }
+
+  .story-container :deep(.utp-visualization) {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .story-container :deep(.utp-cable) {
+    transform: rotate(90deg);
+    width: 60px;
+    margin: 1rem 0;
+  }
+
+  .story-container :deep(.cable-label) {
+    transform: translateX(-50%) rotate(-90deg);
+  }
+
+  .story-container :deep(.compass-svg) {
+    width: 120px;
+    height: 120px;
   }
 }
 </style>
